@@ -67,6 +67,7 @@ public class StatusUpdate extends DialogFragment {
                 // what happens after positive click
                 String user = "ddd";
                 mListener.onDialogPositiveClick(user);
+                mListener.onDialogDismiss("ok");
             }
 
         }).setNegativeButton(getString(R.string.cancel),null);
