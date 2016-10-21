@@ -5,21 +5,22 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.ToggleButton;
 
 /**
  * Created by dan on 18.10.16.
  */
 
 public class StatusUpdate extends DialogFragment {
-    public interface NoticeDialogListener {
-        public void onDialogPositiveClick(String username);
-        public void onDialogNegativeClick();
-    }
     NoticeDialogListener mListener;
 
     @Override
@@ -43,7 +44,17 @@ public class StatusUpdate extends DialogFragment {
         SharedPreferences sharedPreferences;
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         SharedPreferences.Editor editor = sharedPreferences.edit();
+
+
         View dialogView = inflater.inflate(R.layout.fragment_status, null);
+        final ImageView imA = (ImageView) dialogView.findViewById(R.id.add_image);
+        final TextView txB = (TextView) dialogView.findViewById(R.id.edit_status_text);
+        final ToggleButton tbTw = (ToggleButton) dialogView.findViewById(R.id.tw_toggle);
+        final ToggleButton tbFb = (ToggleButton) dialogView.findViewById(R.id.fb_toggle);
+        ColorStateList lC = txB.getTextColors();
+        imA.setImageTintList(lC);
+        tbTw.setButtonTintList(lC);
+        tbFb.setButtonTintList(lC);
 
         builder.setView(dialogView).setPositiveButton(getString(R.string.publish),new DialogInterface.OnClickListener(){
             public void onClick(DialogInterface dialog, int id){
@@ -56,6 +67,14 @@ public class StatusUpdate extends DialogFragment {
         return builder.create();
 
     }
+
+    public interface NoticeDialogListener {
+        public void onDialogPositiveClick(String username);
+
+        public void onDialogNegativeClick();
+    }
+
+
 
 
 }

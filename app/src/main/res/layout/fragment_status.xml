@@ -1,61 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/edit_status"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:id="@+id/edit_status"
     android:layout_gravity="center"
-    android:padding="4dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="4dp">
 
 
     <TextView
+        android:id="@+id/edit_status_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/edit_status_text"
         android:paddingBottom="8dp"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/edit_status_text"/>
+        android:text="@string/edit_status_text"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="24sp" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:textAlignment="textEnd">
+
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="end"
-            android:paddingBottom="8dp"
-            android:src="@drawable/ic_add_a_photo_black_24dp"/>
+            android:id="@+id/add_image"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_margin="4dp"
+            android:clickable="true"
+            android:src="@drawable/ic_add_a_photo_black_24dp" />
     </LinearLayout>
 
     <EditText
-        android:layout_width="match_parent"
         android:id="@+id/edit_status_form"
-        android:layout_height="wrap_content"
-        android:minLines="4"
-        android:inputType="textMultiLine"
-        android:imeOptions="actionDone"        />
-    <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:imeOptions="actionDone"
+        android:inputType="textMultiLine"
+        android:minLines="4" />
+
+    <EditText
         android:id="@+id/setImageDescription"
-        android:visibility="gone"/>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/syndication"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:textAlignment="textEnd">
+
         <ToggleButton
             android:id="@+id/tw_toggle"
             android:layout_width="24dp"
             android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:layout_margin="4dp"
             android:background="@drawable/tw_check"
-        android:textOn=""
-        android:textOff=""
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:layout_centerVertical="true"/>
+            android:focusable="false"
 
+            android:focusableInTouchMode="false"
+            android:gravity="center"
+            android:textOff=""
+            android:textOn="" />
+
+        <ToggleButton
+            android:id="@+id/fb_toggle"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:layout_margin="4dp"
+            android:background="@drawable/fb_check"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:gravity="center"
+            android:textOff=""
+            android:textOn="" />
 
     </LinearLayout>
 
