@@ -55,6 +55,12 @@ public class StatusUpdate extends DialogFragment {
         imA.setImageTintList(lC);
         tbTw.setButtonTintList(lC);
         tbFb.setButtonTintList(lC);
+        imA.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onClickB();
+            }
+        });
 
         builder.setView(dialogView).setPositiveButton(getString(R.string.publish),new DialogInterface.OnClickListener(){
             public void onClick(DialogInterface dialog, int id){
@@ -68,8 +74,15 @@ public class StatusUpdate extends DialogFragment {
 
     }
 
+    public void onClickB() {
+
+        this.dismiss();
+    }
+
     public interface NoticeDialogListener {
         public void onDialogPositiveClick(String username);
+
+        public void onDialogDismiss(String dismiss);
 
         public void onDialogNegativeClick();
     }

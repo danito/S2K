@@ -46,19 +46,17 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
     String prefHostname;
     String prefApikey;
     String prefAction;
+    ImageView ivLogo;
+    ImageView ivProfilePicture;
+    SharedPreferences settings;
+    SharedPreferences.Editor editor;
+    String prefDisplayname;
+    String prefPicture;
+    ArrayList<HashMap<String, HashMap<String, String>>> serviceList;
     private String setUsername;
     private String setHostname;
     private String setApiKey;
 
-    ImageView ivLogo;
-    ImageView ivProfilePicture;
-
-    SharedPreferences settings;
-    SharedPreferences.Editor editor;
-
-    String prefDisplayname;
-    String prefPicture;
-    ArrayList<HashMap<String, HashMap<String, String>>> serviceList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,6 +124,9 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
         switch (view.getId()) {
             case R.id.logo_k:
                 showConnectionDialog();
+                break;
+            case R.id.add_image:
+                Log.i(TAG, "onClick: in fragment");
                 break;
           /*  case R.id.showAlertDialogFragment:
                 MyAlertDialogFragment alertDialogFragment = new MyAlertDialogFragment();
@@ -213,6 +214,11 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
 
     }
 
+    @Override
+    public void onDialogDismiss(String dismiss) {
+        Log.i(TAG, "onDialogDismiss: " + dismiss);
+    }
+
 
     // Handle incoming text or image
 
@@ -238,6 +244,35 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
         if (imageUri != null) {
             // Update UI to reflect image being shared
         }
+    }
+
+    public String getSignature(String apikey, String action) {
+        ApiSecurity api = new ApiSecurity();
+        api.setSecurity(action, apikey);
+        return api.getHash();
+    }
+
+    public void setSharedPref(String name, String value) {
+        editor.putString(name, value);
+        editor.commit();
+    }
+
+    public void setSharedPref(String name, boolean value) {
+        editor.putBoolean(name, value);
+        editor.commit();
+    }
+
+    public void savePrefsSet(String name, Set val) {
+        editor.putStringSet(name, val);
+        editor.commit();
+    }
+
+    public String getSharedPref(String name, String defaultvalue) {
+        return settings.getString(name, defaultvalue);
+    }
+
+    public boolean getSharedPref(String name, boolean defaultvalue) {
+        return settings.getBoolean(name, defaultvalue);
     }
 
     class getJson extends AsyncTask<String, String, JSONObject> {
@@ -333,35 +368,6 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
 
             }
         }
-    }
-
-    public String getSignature(String apikey, String action) {
-        ApiSecurity api = new ApiSecurity();
-        api.setSecurity(action, apikey);
-        return api.getHash();
-    }
-
-    public void setSharedPref(String name, String value) {
-        editor.putString(name, value);
-        editor.commit();
-    }
-
-    public void setSharedPref(String name, boolean value) {
-        editor.putBoolean(name, value);
-        editor.commit();
-    }
-
-    public void savePrefsSet(String name, Set val) {
-        editor.putStringSet(name, val);
-        editor.commit();
-    }
-
-    public String getSharedPref(String name, String defaultvalue) {
-        return settings.getString(name, defaultvalue);
-    }
-
-    public boolean getSharedPref(String name, boolean defaultvalue) {
-        return settings.getBoolean(name, defaultvalue);
     }
 
 
