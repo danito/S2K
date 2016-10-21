@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="update_status" type="id">Publish</item>
+    <item name="cancel" type="id">Cancel</item>
+    <item name="attempt_conn" type="id">Retrieving informations...</item>
+    <item name="wrong_username" type="id">Wrong username, check settings</item>
+</resources>

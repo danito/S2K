@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="fa_icon_comment_o">&#xf0e5;</string>
+    <string name="fa_icon_align_left">&#xf036;</string>
+    <string name="fa_icon_file_picture_o">&#xf1c5;</string>
+    <string name="fa_icon_star_o">&#xf006;</string>
+    <string name="fa_icon_retweet">&#xf079;</string>
+    <string name="fa_icon_bookmark">&#xf02e;</string>
+    <string name="fa_icon_map_marker">&#xf041;</string>
+    <string name="fa_icon_microphone">&#xf130;</string>
+
+</resources>

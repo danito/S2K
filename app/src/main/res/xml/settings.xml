@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:key="setUserProfile"
+        android:title="@string/set_title">
+        <EditTextPreference
+            android:key="setUsername"
+            android:summary="@string/set_user_name_summary"
+            android:inputType="textNoSuggestions"
+            android:capitalize="none"
+            android:title="@string/set_user_name" />
+        <EditTextPreference
+            android:key="setHostname"
+            android:summary="@string/set_host_name_summary"
+            android:inputType="textNoSuggestions"
+            android:capitalize="none"
+            android:title="@string/set_host_name" />
+        <EditTextPreference
+            android:key="setApiKey"
+            android:summary="@string/set_api_key_summary"
+            android:inputType="textNoSuggestions"
+            android:capitalize="none"
+            android:persistent="true"
+            android:title="@string/set_api_key" />
+        <CheckBoxPreference
+            android:key="useReactions"
+            android:selectable="true"
+            android:defaultValue="false"
+            android:summary="@string/set_reactions_summary"
+            android:title="@string/set_reactions"/>
+        <CheckBoxPreference
+            android:key="connStatus"
+            android:selectable="false"
+            android:defaultValue="false"
+            android:summary="@string/conn_status_summary"
+            android:title="@string/conn_status"/>
+
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="set_sharing"
+        android:title="@string/set_behavior">
+        <CheckBoxPreference
+            android:key="setImageReduce"
+            android:summary="@string/set_image_reduce_summary"
+            android:title="@string/set_image_reduce"
+            android:defaultValue="true"/>
+    </PreferenceCategory>
+</PreferenceScreen>

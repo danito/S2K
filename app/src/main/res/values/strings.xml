@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">PreferencesTest</string>
+    <string name="set_title">User profile</string>
+    <string name="set_user_name_summary">Set your Known username</string>
+    <string name="set_user_name">Username</string>
+    <string name="set_host_name_summary">https://your.known.site</string>
+    <string name="set_host_name">Hostname</string>
+    <string name="set_api_key_summary"><![CDATA[Get your API key from account settings->tools]]></string>
+    <string name="set_api_key">Api key</string>
+    <string name="menuSettings">Settings</string>
+    <string name="set_image_reduce_summary">Reduce size of images</string>
+    <string name="set_image_reduce">Reduce Images</string>
+    <string name="publish">Publish</string>
+    <string name="cancel">Cancel</string>
+    <string name="edit_status_text">New Status Update</string>
+    <string name="attempt_conn">Retrieving information...</string>
+    <string name="no_network">No network found. Check your Internet settings.</string>
+    <string name="wrong_url">Host name doesn\'t respond, please check the url</string>
+    <string name="wrong_username">Wrong username. Check settings</string>
+    <string name="wrong_api">Wrong API. Check your settings</string>
+    <string name="conn_status">Connection status</string>
+    <string name="conn_status_summary">not connected. Check profile settings</string>
+    <string name="set_behavior">Sharing settings</string>
+    <string name="conn_status_error_api">Wrong API key, please check settings</string>
+    <string name="conn_status_ok">Connected to</string>
+    <string name="set_reactions_summary">Use Indieweb style reactions</string>
+    <string name="set_reactions">IndieWeb Reactions</string>
+    <string name="set_reactions_summary_nok">Reactions plugin not found. Install it from https://github.com/kylewm/KnownReactions</string>
+</resources>
