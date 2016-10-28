@@ -1,4 +1,4 @@
-package be.nixekinder.preferencestest;
+package be.nixekinder.ShareWithKnown;
 
 /**
  * Created by dan on 18.10.16.
@@ -15,14 +15,12 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import be.nixekinder.preferencestest.R;
+
 public class MyDialogFragment extends DialogFragment implements TextView.OnEditorActionListener {
 
     private EditText mEditText;
 
-
-    public interface statusUpdateListener {
-        void onFinishUserDialog(String user);
-    }
 
     // Empty constructor required for DialogFragment
     public MyDialogFragment() {
@@ -52,5 +50,9 @@ public class MyDialogFragment extends DialogFragment implements TextView.OnEdito
         activity.onFinishUserDialog(mEditText.getText().toString());
         this.dismiss();
         return true;
+    }
+
+    public interface statusUpdateListener {
+        void onFinishUserDialog(String user);
     }
 }

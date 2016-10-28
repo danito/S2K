@@ -1,4 +1,4 @@
-package be.nixekinder.preferencestest;
+package be.nixekinder.ShareWithKnown;
 
 /**
  * Created by dan on 18.10.16.

@@ -1,4 +1,4 @@
-package be.nixekinder.preferencestest;
+package be.nixekinder.ShareWithKnown;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

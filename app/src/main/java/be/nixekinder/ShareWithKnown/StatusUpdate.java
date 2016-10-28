@@ -1,4 +1,4 @@
-package be.nixekinder.preferencestest;
+package be.nixekinder.ShareWithKnown;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
@@ -15,6 +14,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+
+import be.nixekinder.preferencestest.R;
 
 /**
  * Created by dan on 18.10.16.
@@ -81,11 +82,11 @@ public class StatusUpdate extends DialogFragment {
     }
 
     public interface NoticeDialogListener {
-        public void onDialogPositiveClick(String username);
+        void onDialogPositiveClick(String username);
 
-        public void onDialogDismiss(String dismiss);
+        void onDialogDismiss(String dismiss);
 
-        public void onDialogNegativeClick();
+        void onDialogNegativeClick();
     }
 
 

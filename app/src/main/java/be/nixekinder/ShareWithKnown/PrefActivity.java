@@ -1,12 +1,10 @@
-package be.nixekinder.preferencestest;
+package be.nixekinder.ShareWithKnown;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 public class PrefActivity extends AppCompatActivity {

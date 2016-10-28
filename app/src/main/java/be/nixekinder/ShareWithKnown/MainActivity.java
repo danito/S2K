@@ -1,4 +1,4 @@
-package be.nixekinder.preferencestest;
+package be.nixekinder.ShareWithKnown;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -37,6 +37,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import be.nixekinder.preferencestest.R;
 
 public class MainActivity extends AppCompatActivity implements StatusUpdate.NoticeDialogListener {
     private static final String TAG = "IneedCoffee";

@@ -1,4 +1,4 @@
-package be.nixekinder.preferencestest;
+package be.nixekinder.ShareWithKnown;
 
 import android.util.Base64;
 import android.util.Log;
@@ -17,6 +17,10 @@ public class ApiSecurity {
     private String message;
     private String encodedHash;
 
+    private static int intVal(byte b) {
+        return 0;
+    }
+
     public void setMac() {
         try {
             String secret = getSecret();
@@ -34,11 +38,6 @@ public class ApiSecurity {
             Log.i("HMAC", "main: ERROR");
         }
 
-    }
-
-
-    private static int intVal(byte b) {
-        return 0;
     }
 
     private String geMessage() {

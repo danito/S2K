@@ -1,4 +1,4 @@
-package be.nixekinder.preferencestest;
+package be.nixekinder.ShareWithKnown;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
@@ -27,6 +27,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
+
+import be.nixekinder.preferencestest.R;
 
 import static android.content.ContentValues.TAG;
 
