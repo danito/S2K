@@ -188,44 +188,6 @@
             android:orientation="horizontal"
             android:textAlignment="textEnd">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:text="\@nxd4n" />
-
-            <ToggleButton
-                android:id="@+id/tw_toggle"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_margin="4dp"
-                android:background="@drawable/tw_check"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:gravity="center"
-                android:textOff=""
-                android:textOn="" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:paddingStart="16dp"
-                android:text="Daniel Nix" />
-
-            <ToggleButton
-                android:id="@+id/fb_toggle"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_margin="4dp"
-                android:background="@drawable/fb_check"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:gravity="center"
-                android:textOff=""
-                android:textOn="" />
-
-
         </LinearLayout>
 
         <LinearLayout

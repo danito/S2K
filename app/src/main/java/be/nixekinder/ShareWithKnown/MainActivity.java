@@ -19,11 +19,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.RadioGroup;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -33,12 +37,19 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import be.nixekinder.preferencestest.R;
+
+import static android.R.attr.key;
+import static android.content.ContentValues.TAG;
 
 public class MainActivity extends AppCompatActivity implements StatusUpdate.NoticeDialogListener {
     private static final String TAG = "IneedCoffee";
@@ -64,6 +75,8 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
     private Button btnDisplay;
     private String statusAction;
     private HashMap<String, String> postParameters;
+    private ArrayList<HashMap<String, String>> servicelist;
+    private ListView lv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
         String action = intent.getAction();
         String type = intent.getType();
 
+      
         showPrefs();
 
 
@@ -113,7 +127,16 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
 
     }
 
-
+    private void setServicesViews() {
+        String services = getSharedPref("setServices", "");
+        StringTokenizer tServices = new StringTokenizer(services, ";");
+        int t = 0;
+        while (tServices.hasMoreTokens()) {
+            String service = tServices.nextToken();
+            // twitter::user
+            t++;
+        }
+    }
 
     public void onClick(View view) {
 
@@ -279,14 +302,14 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
             TextView tvHostname = (TextView) findViewById(R.id.profile_host);
             tvHostname.setText(setHostname);
         }
-        if(!setUsername.equals("")){
+        if (!setUsername.equals("")) {
             TextView tvHostname = (TextView) findViewById(R.id.profile_name);
             tvHostname.setText(setUsername);
         }
         boolean status = sharedPreferences.getBoolean("connStatus", false);
         ViewGroup vgEditStatus = (ViewGroup) findViewById(R.id.edit_status);
         TextView tvNoSettings = (TextView) findViewById(R.id.text_no_settings);
-        if (status){
+        if (status) {
             Log.i(TAG, "showPrefs: conn ok");
             tvNoSettings.setVisibility(View.GONE);
             vgEditStatus.setVisibility(View.VISIBLE);

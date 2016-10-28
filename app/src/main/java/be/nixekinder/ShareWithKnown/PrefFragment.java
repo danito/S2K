@@ -19,17 +19,23 @@ import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.util.Log;
+import android.util.StringBuilderPrinter;
+import android.widget.ListAdapter;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 import be.nixekinder.preferencestest.R;
 
+import static android.R.attr.key;
 import static android.content.ContentValues.TAG;
 
 @SuppressLint("NewApi")
@@ -286,6 +292,7 @@ public class PrefFragment extends PreferenceFragment implements
             return null;
         }
 
+
         @Override
         protected void onPostExecute(JSONObject json) {
             super.onPostExecute(json);
@@ -361,6 +368,21 @@ public class PrefFragment extends PreferenceFragment implements
                         if(json.has("services") ) {
                             Log.i(TAG, "onPostExecute: hasServices opiOk");
                             apiIsOk = true;
+                            StringBuilder sbServices = new StringBuilder();
+                            JSONObject oServices = json.getJSONObject("services");
+                            for (int i = 0; i < oServices.length(); i++) {
+                                if (i != 0) {
+                                    sbServices.append(";");
+                                }
+                                String key = oServices.names().getString(i);
+                                JSONArray arrJ = oServices.getJSONArray(key);
+                                JSONObject value = arrJ.getJSONObject(0);
+                                String username = value.getString("username");
+                                sbServices.append(key + "::" + username);
+                            }
+                            String services = sbServices.toString();
+                            setPreference("setServices", services);
+
                         }
 
                         Log.i(TAG, "onPostExecute: " + displayname + ", " + kId + ", " + imageurl);
