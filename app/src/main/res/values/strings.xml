@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PreferencesTest</string>
+    <string name="app_name">Share WithKnown</string>
     <string name="set_title">User profile</string>
     <string name="set_user_name_summary">Set your Known username</string>
     <string name="set_user_name">Username</string>
@@ -26,4 +26,21 @@
     <string name="set_reactions_summary">Use Indieweb style reactions</string>
     <string name="set_reactions">IndieWeb Reactions</string>
     <string name="set_reactions_summary_nok">Reactions plugin not found. Install it from https://github.com/kylewm/KnownReactions</string>
+    <string name="no_settings">Not connected to your Known site. Please check settings.</string>
+    <string name="imageDescription">Image Description</string>
+    <string name="status_text_hint">New status update</string>
+    <string name="btn_image">Image</string>
+    <string name="btn_audio">audio</string>
+    <string name="btn_bookmark">Bookmark</string>
+    <string name="btn_status">Status</string>
+    <string name="image_description_hint">Description and hashtags</string>
+    <string name="edit_image_text">New Photo</string>
+    <string name="edit_bkm_text">New Bookmark</string>
+    <string name="status_text_hint_bkm">Page address</string>
+    <string name="status_text_hint_photo">Give it a title</string>
+    <string name="edit_bkm_text_star">New Like</string>
+    <string name="edit_bkm_text_repost">New Repost</string>
+    <string name="reply_to_hint">Reply to a site</string>
+    <string name="posting">Posting status...</string>
+    <string name="post_published">Status published</string>
 </resources>

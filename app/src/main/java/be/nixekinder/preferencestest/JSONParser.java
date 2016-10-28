@@ -20,9 +20,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.StringTokenizer;
 
 import static android.content.ContentValues.TAG;
-import static java.lang.System.in;
 
 public class JSONParser {
 
@@ -50,8 +50,23 @@ public class JSONParser {
                     if (i != 0) {
                         sbParams.append("&");
                     }
-                    sbParams.append(key).append("=")
-                            .append(URLEncoder.encode(params.get(key), charset));
+                    if (key.equals("syndication")) {
+                        StringTokenizer services = new StringTokenizer(params.get(key), ";");
+                        int t = 0;
+                        while (services.hasMoreTokens()) {
+                            if (t != 0) {
+                                sbParams.append("&");
+                            }
+                            String service = services.nextToken();
+                            sbParams.append("syndication[]").append("=").append(URLEncoder.encode(service, charset));
+                            Log.i(TAG, "makeHttpRequest: " + service);
+                            t++;
+                        }
+
+                    } else {
+                        sbParams.append(key).append("=")
+                                .append(URLEncoder.encode(params.get(key), charset));
+                    }
 
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
@@ -83,6 +98,7 @@ public class JSONParser {
                 conn.connect();
 
                 paramsString = sbParams.toString();
+                Log.i(TAG, "makeHttpRequest: paramstring " + paramsString);
 
                 wr = new DataOutputStream(conn.getOutputStream());
                 wr.writeBytes(paramsString);

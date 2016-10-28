@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.Set;
 
 import static android.content.ContentValues.TAG;
-import static android.text.Html.fromHtml;
 
 @SuppressLint("NewApi")
 /**
@@ -39,17 +38,15 @@ import static android.text.Html.fromHtml;
 public class PrefFragment extends PreferenceFragment implements
         SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private boolean urlIsOK = false;
-    private boolean apiIsOk = true;
-    private boolean userIsOk = false;
     CheckBoxPreference etpConnStatus;
     SharedPreferences defSharedPrefs;
     CheckBoxPreference etpUseReactions;
     EditTextPreference etpSetProfilePicture;
-
-
-    private String username;
     String profilePicture;
+    private boolean urlIsOK = false;
+    private boolean apiIsOk = true;
+    private boolean userIsOk = false;
+    private String username;
     private boolean hasReactions = false;
 
     @SuppressLint("NewApi")
@@ -98,8 +95,23 @@ public class PrefFragment extends PreferenceFragment implements
         etpUseReactions = (CheckBoxPreference) findPreference("useReactions");
 
         String mUsername = etpUsername.getText();
+        if (mUsername == null) {
+            mUsername = "";
+            userIsOk = false;
+        }
         String url = etpUrl.getText();
+        Log.i(TAG, "onSharedPreferenceChanged: urlgettext " + url);
+        if (url == null) {
+            url = "";
+            urlIsOK = false;
+        }
+        Log.i(TAG, "onSharedPreferenceChanged: urlgettext " + url);
+
         String apikey = etpApikey.getText();
+        if (apikey == null) {
+            apikey = "";
+            apiIsOk = false;
+        }
         username = mUsername;
 
         Log.i(TAG, "onSharedPreferenceChanged: something changed " + key);
@@ -127,6 +139,7 @@ public class PrefFragment extends PreferenceFragment implements
 
         } else if (key.equals("setUsername")) {
             if (!url.equals("")) {
+                Log.i(TAG, "onSharedPreferenceChanged: url = " + url);
                 new getJson().execute(url, "CHECK", mUsername, apikey, "/" );
             }
         } else if (key.equals("useReactions")) {
@@ -153,14 +166,72 @@ public class PrefFragment extends PreferenceFragment implements
 
     }
 
+    public String getSignature(String apikey, String action) {
+        Log.i(TAG, "getSignature: apikey " + apikey);
+        Log.i(TAG, "getSignature: actio " + action);
+        ApiSecurity api = new ApiSecurity();
+        api.setSecurity(action, apikey);
+        return api.getHash();
+    }
+
+    private void toast(String toast) {
+        Toast.makeText(getActivity(), toast, Toast.LENGTH_SHORT).show();
+    }
+
+    private void updatePreference(Preference preference) {
+        if (preference instanceof EditTextPreference) {
+            EditTextPreference editTextPreference = (EditTextPreference) preference;
+            editTextPreference.setSummary(editTextPreference.getText());
+        } else if (preference instanceof CheckBoxPreference) {
+            CheckBoxPreference checkBoxPreference = (CheckBoxPreference) preference;
+
+        } else if (preference instanceof ListPreference) {
+            ListPreference listPreference = (ListPreference) preference;
+            listPreference.setSummary(listPreference.getEntry());
+        } else if (preference instanceof RingtonePreference) {
+            RingtonePreference ringtonePreference = (RingtonePreference) preference;
+            String ring = getPreferenceScreen().getSharedPreferences().getString("prefRingtone", null);
+            ringtonePreference.setSummary(ring);
+        } else if (preference instanceof MultiSelectListPreference) {
+            MultiSelectListPreference multiSelectListPreference = (MultiSelectListPreference) preference;
+            Set<String> prefMultiList = getPreferenceScreen().getSharedPreferences().getStringSet("prefMultiList", null);
+            String[] selectedprefMultiList = prefMultiList.toArray(new String[]{});
+            String selected = "";
+            for (int i = 0; i < selectedprefMultiList.length; i++) {
+                selected += "-" + selectedprefMultiList[i] + "-";
+            }
+            multiSelectListPreference.setSummary(selected);
+        }
+
+
+    }
+
+    private void setPreference(String key, String value) {
+        SharedPreferences.Editor editor = defSharedPrefs.edit();
+        editor.putString(key, value);
+        editor.commit();
+    }
+
+    private void setPreference(String key, boolean value) {
+        SharedPreferences.Editor editor = defSharedPrefs.edit();
+        editor.putBoolean(key, value);
+        editor.commit();
+    }
+
+    private void setPreference(String key, int value) {
+        SharedPreferences.Editor editor = defSharedPrefs.edit();
+        editor.putInt(key, value);
+        editor.commit();
+    }
+
     /**
      * new getJson().execute(url,"GET",mUsername, apikey,"profile/" + mUsername);
      */
     class getJson extends AsyncTask<String, String, JSONObject> {
         JSONParser jsonParser = new JSONParser();
-        private ProgressDialog pDialog;
         boolean sig = false;
         String hostname;
+        private ProgressDialog pDialog;
 
         @Override
         protected void onPreExecute() {
@@ -184,6 +255,7 @@ public class PrefFragment extends PreferenceFragment implements
                 String url = args[0];
                 url = url.replaceAll("/$","");
                 hostname = url;
+                Log.i(TAG, "doInBackground: hostname " + hostname);
                 if (!args[4].equals(null)) {
                     signature = getSignature(args[3], args[4]);
                     Log.i(TAG, "doInBackground: signature " + signature);
@@ -192,7 +264,7 @@ public class PrefFragment extends PreferenceFragment implements
                     Log.i(TAG, "doInBackground: arg2 " + args[2]);
 
 
-                    url = args[0] + args[4];
+                    url = url + args[4];
                 }
                 Log.i(TAG, "doInBackground: url = " + url);
 
@@ -250,11 +322,12 @@ public class PrefFragment extends PreferenceFragment implements
 
                             etpConnStatus.setSummary(getString(R.string.conn_status_ok));
                             if(!json.has("user")){ //
+                                Log.i(TAG, "onPostExecute: hasuser : true, apiok");
                                 apiIsOk = true;
                             }
 
                             urlIsOK = true;
-                            Log.i(TAG, "onPostExecute: api ok");
+                            Log.i(TAG, "onPostExecute: url ok");
                         }
                         if (json.has("contentTypes")) {
                             Log.i(TAG, "onPostExecute: has ContentTypes");
@@ -284,6 +357,7 @@ public class PrefFragment extends PreferenceFragment implements
                             }
                         }
                         if(json.has("services") ) {
+                            Log.i(TAG, "onPostExecute: hasServices opiOk");
                             apiIsOk = true;
                         }
 
@@ -315,6 +389,7 @@ public class PrefFragment extends PreferenceFragment implements
                         etpConnStatus.setSummary(getString(R.string.conn_status_ok) + " " + hostname);
                         etpConnStatus.setDefaultValue(true);
                         etpConnStatus.setEnabled(true);
+                        etpConnStatus.setChecked(true);
                         if (!profilePicture.equals("")) {
                             setPreference("setProfilePicture",imageurl);
                         }
@@ -322,7 +397,11 @@ public class PrefFragment extends PreferenceFragment implements
                     } else {
                         etpConnStatus.setDefaultValue(false);
                         etpConnStatus.setEnabled(false);
+                        etpConnStatus.setChecked(false);
                         Log.i(TAG, "onPostExecute: all nok user" + userIsOk + " url " + urlIsOK + " api "+ apiIsOk);
+                    }
+                    if (userIsOk && urlIsOK && !apiIsOk) {
+                        etpConnStatus.setSummary(getString(R.string.conn_status_error_api));
                     }
                     if (hasReactions) {
                         etpUseReactions.setSummary(getString(R.string.set_reactions_summary));
@@ -340,61 +419,5 @@ public class PrefFragment extends PreferenceFragment implements
                 } else toast(getString(R.string.wrong_url));
             }
         }
-    }
-
-    public String getSignature(String apikey, String action) {
-        Log.i(TAG, "getSignature: apikey " + apikey);
-        Log.i(TAG, "getSignature: actio " + action);
-        ApiSecurity api = new ApiSecurity();
-        api.setSecurity(action, apikey);
-        return api.getHash();
-    }
-
-    private void toast(String toast) {
-        Toast.makeText(getActivity(), toast, Toast.LENGTH_SHORT).show();
-    }
-
-    private void updatePreference(Preference preference) {
-        if (preference instanceof EditTextPreference) {
-            EditTextPreference editTextPreference = (EditTextPreference) preference;
-            editTextPreference.setSummary(editTextPreference.getText());
-        } else if (preference instanceof CheckBoxPreference) {
-            CheckBoxPreference checkBoxPreference = (CheckBoxPreference) preference;
-
-        } else if (preference instanceof ListPreference) {
-            ListPreference listPreference = (ListPreference) preference;
-            listPreference.setSummary(listPreference.getEntry());
-        } else if (preference instanceof RingtonePreference) {
-            RingtonePreference ringtonePreference = (RingtonePreference) preference;
-            String ring = getPreferenceScreen().getSharedPreferences().getString("prefRingtone", null);
-            ringtonePreference.setSummary(ring);
-        } else if (preference instanceof MultiSelectListPreference) {
-            MultiSelectListPreference multiSelectListPreference = (MultiSelectListPreference) preference;
-            Set<String> prefMultiList = getPreferenceScreen().getSharedPreferences().getStringSet("prefMultiList", null);
-            String[] selectedprefMultiList = prefMultiList.toArray(new String[]{});
-            String selected = "";
-            for (int i = 0; i < selectedprefMultiList.length; i++) {
-                selected += "-" + selectedprefMultiList[i] + "-";
-            }
-            multiSelectListPreference.setSummary(selected);
-        }
-
-
-    }
-
-    private void setPreference(String key, String value){
-        SharedPreferences.Editor editor = defSharedPrefs.edit();
-        editor.putString(key,value);
-        editor.commit();
-    }
-    private void setPreference(String key, boolean value){
-        SharedPreferences.Editor editor = defSharedPrefs.edit();
-        editor.putBoolean(key,value);
-        editor.commit();
-    }
-    private void setPreference(String key, int value){
-        SharedPreferences.Editor editor = defSharedPrefs.edit();
-        editor.putInt(key,value);
-        editor.commit();
     }
 }

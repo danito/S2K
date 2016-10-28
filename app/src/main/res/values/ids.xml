@@ -4,4 +4,5 @@
     <item name="cancel" type="id">Cancel</item>
     <item name="attempt_conn" type="id">Retrieving informations...</item>
     <item name="wrong_username" type="id">Wrong username, check settings</item>
+    <item name="post_published" type="id">Post published</item>
 </resources>
