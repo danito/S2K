@@ -11,9 +11,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.text.InputType;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -37,12 +39,14 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -50,6 +54,7 @@ import be.nixekinder.preferencestest.R;
 
 import static android.R.attr.key;
 import static android.content.ContentValues.TAG;
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 
 public class MainActivity extends AppCompatActivity implements StatusUpdate.NoticeDialogListener {
     private static final String TAG = "IneedCoffee";
@@ -70,6 +75,8 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
     private String setUsername;
     private String setHostname;
     private String setApiKey;
+    private String setSyndication;
+    private HashMap<String, String> setSyndicationList = new HashMap<>();
     private boolean setReactions;
     private RadioGroup radioGroup;
     private Button btnDisplay;
@@ -138,6 +145,20 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
         }
     }
 
+    public void onClickTb(View v) {
+        ToggleButton t = (ToggleButton) v;
+        myServices o = (myServices) t.getTag();
+        String service = o.service;
+        String username = o.username;
+        String name = o.name;
+        if (t.isChecked()) {
+            Log.i(TAG, "onClickTb: " + service + " " + username);
+            setSyndicationList.put(username, service);
+        } else {
+            setSyndicationList.remove(username);
+        }
+    }
+
     public void onClick(View view) {
 
         switch (view.getId()) {
@@ -202,7 +223,6 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
                     if (isUrl(mReply)) {
                         postParameters.put("inreplyto[]", mReply);
                     }
-                    // TODO: 26/10/2016 handle syndication
 
                     break;
                 case "bookmark":
@@ -292,6 +312,9 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
                 "setApiKey", "");
         setReactions = sharedPreferences.getBoolean("useReactions", false);
 
+        setSyndication = sharedPreferences.getString("setServices", "");
+
+        showSyndication(setSyndication);
 
         prefPicture = sharedPreferences.getString("setProfilePicture", "");
         if (!prefPicture.equals("")) {
@@ -322,6 +345,150 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
         }
 
 
+    }
+
+    private void showSyndication(String services) {
+        Log.i(TAG, "showSyndication: " + services);
+        if (!services.equals("")) {
+            LinearLayout llSyndication = (LinearLayout) findViewById(R.id.syndication);
+            StringTokenizer tServices = new StringTokenizer(services, ";");
+            int l = tServices.countTokens();
+            int r = l % 3;
+            int t = l + (3 - r);
+
+            for (int i = 0; i < t; i += 3) {
+                LinearLayout LL = new LinearLayout(this);
+                LinearLayoutCompat.LayoutParams LLParams = new LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.MATCH_PARENT, LinearLayoutCompat.LayoutParams.MATCH_PARENT);
+                LL.setLayoutParams(LLParams);
+                LL.setOrientation(LinearLayout.HORIZONTAL);
+                llSyndication.addView(LL);
+                String ntA = "";
+                if (tServices.hasMoreElements()) {
+                    ntA = tServices.nextToken();
+                    Log.i(TAG, "showSyndication ntA: " + ntA);
+                    StringTokenizer stValueA = new StringTokenizer(ntA, "::");
+                    String service = stValueA.nextToken();
+                    String username = stValueA.nextToken();
+                    String name = stValueA.nextToken();
+                    myServices myServiceA = new myServices(service, username, name);
+                    LayoutInflater inflater = LayoutInflater.from(this);
+                    switch (service) {
+                        case "facebook":
+                            View inflatedLayoutFb = inflater.inflate(R.layout.sl_facebook, null, false);
+                            LL.addView(inflatedLayoutFb);
+                            TextView tvFb = (TextView) inflatedLayoutFb.findViewById(R.id.service_name);
+                            tvFb.setText(name);
+                            ToggleButton tbFb = (ToggleButton) findViewById(R.id.fb_toggle);
+                            tbFb.setTag(myServiceA);
+
+                            break;
+                        case "twitter":
+                            View inflatedLayoutTw = inflater.inflate(R.layout.sl_twitter, null, false);
+                            LL.addView(inflatedLayoutTw);
+                            TextView tvTw = (TextView) inflatedLayoutTw.findViewById(R.id.service_name);
+                            tvTw.setText(name);
+                            ToggleButton tbTw = (ToggleButton) findViewById(R.id.tw_toggle);
+                            tbTw.setTag(myServiceA);
+
+                            break;
+                        default:
+                            View inflatedLayout = inflater.inflate(R.layout.sl_unknown, null, false);
+                            LL.addView(inflatedLayout);
+                            TextView tv = (TextView) inflatedLayout.findViewById(R.id.service_name);
+                            tv.setText(name);
+                            ToggleButton tb = (ToggleButton) findViewById(R.id.sh_toggle);
+                            tb.setTag(myServiceA);
+
+                            break;
+                    }
+
+
+                }
+                String ntB = "";
+                if (tServices.hasMoreElements()) {
+                    ntB = tServices.nextToken();
+                    StringTokenizer stValueB = new StringTokenizer(ntB, "::");
+                    String service = stValueB.nextToken();
+                    String username = stValueB.nextToken();
+                    String name = stValueB.nextToken();
+                    myServices myServiceB = new myServices(service, username, name);
+                    LayoutInflater inflater = LayoutInflater.from(this);
+                    switch (service) {
+                        case "facebook":
+                            View inflatedLayoutFb = inflater.inflate(R.layout.sl_facebook, null, false);
+                            LL.addView(inflatedLayoutFb);
+                            TextView tvFb = (TextView) inflatedLayoutFb.findViewById(R.id.service_name);
+                            tvFb.setText(name);
+                            ToggleButton tbFb = (ToggleButton) findViewById(R.id.fb_toggle);
+                            tbFb.setTag(myServiceB);
+
+                            break;
+                        case "twitter":
+                            View inflatedLayoutTw = inflater.inflate(R.layout.sl_twitter, null, false);
+                            LL.addView(inflatedLayoutTw);
+                            TextView tvTw = (TextView) inflatedLayoutTw.findViewById(R.id.service_name);
+                            tvTw.setText(name);
+                            ToggleButton tbTw = (ToggleButton) findViewById(R.id.tw_toggle);
+                            tbTw.setTag(myServiceB);
+
+                            break;
+                        default:
+                            View inflatedLayout = inflater.inflate(R.layout.sl_unknown, null, false);
+                            LL.addView(inflatedLayout);
+                            TextView tv = (TextView) inflatedLayout.findViewById(R.id.service_name);
+                            tv.setText(name);
+                            ToggleButton tb = (ToggleButton) findViewById(R.id.sh_toggle);
+                            tb.setTag(myServiceB);
+
+                            break;
+                    }
+
+                }
+                String ntC = "";
+                if (tServices.hasMoreElements()) {
+                    ntC = tServices.nextToken();
+                    StringTokenizer stValueA = new StringTokenizer(ntC, "::");
+                    String service = stValueA.nextToken();
+                    String username = stValueA.nextToken();
+                    String name = stValueA.nextToken();
+                    myServices myServiceC = new myServices(service, username, name);
+                    LayoutInflater inflater = LayoutInflater.from(this);
+                    switch (service) {
+                        case "facebook":
+                            View inflatedLayoutFb = inflater.inflate(R.layout.sl_facebook, null, false);
+                            LL.addView(inflatedLayoutFb);
+                            TextView tvFb = (TextView) inflatedLayoutFb.findViewById(R.id.service_name);
+                            tvFb.setText(name);
+                            ToggleButton tbFb = (ToggleButton) findViewById(R.id.fb_toggle);
+                            tbFb.setTag(myServiceC);
+
+                            break;
+                        case "twitter":
+                            View inflatedLayoutTw = inflater.inflate(R.layout.sl_twitter, null, false);
+                            LL.addView(inflatedLayoutTw);
+                            TextView tvTw = (TextView) inflatedLayoutTw.findViewById(R.id.service_name);
+                            tvTw.setText(name);
+                            ToggleButton tbTw = (ToggleButton) findViewById(R.id.tw_toggle);
+                            tbTw.setTag(myServiceC);
+
+                            break;
+                        default:
+                            View inflatedLayout = inflater.inflate(R.layout.sl_unknown, null, false);
+                            LL.addView(inflatedLayout);
+                            TextView tv = (TextView) inflatedLayout.findViewById(R.id.service_name);
+                            tv.setText(name);
+                            ToggleButton tb = (ToggleButton) findViewById(R.id.sh_toggle);
+                            tb.setTag(myServiceC);
+
+                            break;
+                    }
+
+                }
+
+
+            }
+
+        }
     }
 
     @Override
@@ -749,6 +916,25 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
                     toast(getString(R.string.wrong_api));
                 } else toast(getString(R.string.wrong_url));
             }
+        }
+    }
+
+
+    public class myServices {
+        String service;
+        String name;
+        String username;
+
+        public myServices() {
+            service = null;
+            name = null;
+            username = null;
+        }
+
+        public myServices(String s, String n, String u) {
+            service = s;
+            name = n;
+            username = u;
         }
     }
 

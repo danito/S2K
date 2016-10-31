@@ -373,15 +373,19 @@ public class PrefFragment extends PreferenceFragment implements
                             for (int i = 0; i < oServices.length(); i++) {
                                 if (i != 0) {
                                     sbServices.append(";");
+                                    Log.i(TAG, "onPostExecute: should append ;");
                                 }
                                 String key = oServices.names().getString(i);
                                 JSONArray arrJ = oServices.getJSONArray(key);
                                 JSONObject value = arrJ.getJSONObject(0);
                                 String username = value.getString("username");
-                                sbServices.append(key + "::" + username);
+                                String name = value.getString("name");
+                                sbServices.append(key + "::" + username + "::" + name);
+
                             }
                             String services = sbServices.toString();
                             setPreference("setServices", services);
+                            Log.i(TAG, "onPostExecute: services : " + services);
 
                         }
 
