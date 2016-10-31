@@ -15,6 +15,7 @@ import android.support.v7.widget.LinearLayoutCompat;
 import android.text.InputType;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -52,6 +53,7 @@ import java.util.StringTokenizer;
 
 import be.nixekinder.preferencestest.R;
 
+import static android.R.attr.gravity;
 import static android.R.attr.key;
 import static android.content.ContentValues.TAG;
 import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
@@ -64,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
     String prefHostname;
     String prefApikey;
     String prefAction;
+    int debug = 0;
 
     ImageView ivProfilePicture;
     SharedPreferences settings;
@@ -90,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.i(TAG, "onCreate: oncreate");
+
 
 
         settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE); //1
@@ -302,7 +306,6 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
 
 
     private void showPrefs() {
-        Log.i(TAG, "showPrefs: ");
 
         setUsername = sharedPreferences.getString(
                 "setUsername", "");
@@ -314,7 +317,6 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
 
         setSyndication = sharedPreferences.getString("setServices", "");
 
-        showSyndication(setSyndication);
 
         prefPicture = sharedPreferences.getString("setProfilePicture", "");
         if (!prefPicture.equals("")) {
@@ -336,6 +338,10 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
             Log.i(TAG, "showPrefs: conn ok");
             tvNoSettings.setVisibility(View.GONE);
             vgEditStatus.setVisibility(View.VISIBLE);
+            if (debug == 0) { //first time
+                showSyndication(setSyndication);
+            }
+            debug++;
             statusAction = "status";
 
         } else {
@@ -355,12 +361,16 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
             int l = tServices.countTokens();
             int r = l % 3;
             int t = l + (3 - r);
-
+            Log.i(TAG, "showSyndication: t = " + t);
+            int u = 0;
             for (int i = 0; i < t; i += 3) {
+                u++;
+                Log.i(TAG, "showSyndication: u = " + u);
                 LinearLayout LL = new LinearLayout(this);
                 LinearLayoutCompat.LayoutParams LLParams = new LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.MATCH_PARENT, LinearLayoutCompat.LayoutParams.MATCH_PARENT);
                 LL.setLayoutParams(LLParams);
                 LL.setOrientation(LinearLayout.HORIZONTAL);
+                LL.setGravity(Gravity.END);
                 llSyndication.addView(LL);
                 String ntA = "";
                 if (tServices.hasMoreElements()) {

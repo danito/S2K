@@ -185,7 +185,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="0"
             android:gravity="end"
-            android:orientation="horizontal"
+            android:orientation="vertical"
+            android:paddingBottom="8dp"
             android:textAlignment="textEnd">
 
         </LinearLayout>
