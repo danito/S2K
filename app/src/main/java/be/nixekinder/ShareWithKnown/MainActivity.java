@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BlurMaskFilter;
 import android.graphics.Typeface;
@@ -16,6 +17,7 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.text.InputType;
+import android.util.Base64;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.Gravity;
@@ -45,6 +47,8 @@ import com.squareup.picasso.Transformation;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
@@ -94,7 +98,9 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
     private HashMap<String, String> postParameters;
     private ArrayList<HashMap<String, String>> servicelist;
     private ListView lv;
-    private Uri image;
+    private String image;
+    private String decodedImage;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,6 +183,22 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
 
         if (requestCode == 0 && resultCode == RESULT_OK && data != null && data.getData() != null) {
             final Uri uri = data.getData();
+            String filePath = null;
+
+            Log.i(TAG, "onActivityResult: getscheme " + uri.getScheme());
+            if (uri != null && "content".equals(uri.getScheme())) {
+                Log.i(TAG, "onActivityResult: uri not null content");
+                Cursor cursor = this.getContentResolver().query(uri, new String[]{android.provider.MediaStore.Images.ImageColumns.DATA}, null, null, null);
+                cursor.moveToFirst();
+                filePath = cursor.getString(0);
+                Log.i(TAG, "onActivityResult: filepath " + filePath);
+                cursor.close();
+            } else {
+                filePath = uri.getPath();
+            }
+            image = filePath;
+            Log.i(TAG, "onActivityResult: filepath " + filePath);
+
             try {
                 Transformation blurTransformation = new Transformation() {
                     @Override
@@ -194,7 +216,6 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                 // Log.d(TAG, String.valueOf(bitmap));
 
-
                 final ImageView ivShareImage = (ImageView) findViewById(R.id.new_photo);
                 ImageCompressionAsyncTask imageCompression = new ImageCompressionAsyncTask() {
                     @Override
@@ -203,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
                     }
                 };
                 String ib = uri.toString();
-                imageCompression.execute(ib);
+                //  imageCompression.execute(ib);
                 //  imageView.setImageBitmap(bitmap);
                 //Picasso.with(getBaseContext()).load(uri).fit().into(ivShareImage);
                 Picasso.with(getBaseContext())
@@ -225,7 +246,8 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
                             public void onError() {
                             }
                         });
-                image = uri;
+
+
                 ImageView ivDelImage = (ImageView) findViewById(R.id.del_image);
                 ivDelImage.setVisibility(View.VISIBLE);
 
@@ -335,9 +357,16 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
                         myAction = "/repost/edit";
                     }
                     break;
-                case "photo":
-                    // TODO: 26/10/2016
-                    myAction = "/photo/edit";
+                case "image":
+
+                    if (!image.toString().equals("null")) {
+                        postParameters.put("title", mStatus);
+                        postParameters.put("body", mDescription);
+
+                        postParameters.put("photo", image.toString());
+                        myAction = "/photo/edit";
+                    }
+
                     break;
             }
 

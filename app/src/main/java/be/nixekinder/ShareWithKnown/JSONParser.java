@@ -4,6 +4,9 @@ package be.nixekinder.ShareWithKnown;
  * Created by danielnix on 15/10/2016.
  */
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -11,7 +14,11 @@ import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,8 +42,18 @@ public class JSONParser {
     StringBuilder sbParams;
     String paramsString;
 
+    String lineEnd = "\r\n";
+    String twoHyphens = "--";
+    String boundary = "------------------------afb19f4aeefb356c";
+    int bytesRead, bytesAvailable, bufferSize;
+    byte[] buffer;
+    int maxBufferSize = 1 * 1024 * 1024;
+    File sourceFile;
+
     boolean withSignature = true;
     int code;
+    private boolean photo;
+    private FileInputStream fileInputStream;
 
     public JSONObject makeHttpRequest(String url, String method,
                                       HashMap<String, String> params, String username, String signature) {
@@ -59,10 +76,23 @@ public class JSONParser {
                             }
                             String service = services.nextToken();
                             sbParams.append("syndication[]").append("=").append(URLEncoder.encode(service, charset));
-                            Log.i(TAG, "makeHttpRequest: " + service);
+                            Log.i(TAG, "makeHttpRequest: services " + service);
                             t++;
                         }
 
+                    } else if (key.equals("photo")) {
+                        photo = true;
+                        sourceFile = new File(params.get(key));
+                        Log.i(TAG, "makeHttpRequest: getkeyphoto " + params.get(key));
+                        try {
+                            fileInputStream = new FileInputStream(sourceFile);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        }
+
+                        sbParams.append(key).append("=")
+                                .append(URLEncoder.encode(params.get(key) + ";filename=alert.jpeg;type=image/jpeg", charset))
+                        ;
                     } else {
                         sbParams.append(key).append("=")
                                 .append(URLEncoder.encode(params.get(key), charset));
@@ -86,6 +116,11 @@ public class JSONParser {
 
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Accept", "application/json");
+                if (photo) {
+                    conn.setRequestProperty("ENCTYPE", "multipart/form-data");
+                    conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+                    conn.setRequestProperty("file", sourceFile.getName());
+                }
 
                 conn.setRequestProperty("Accept-Charset", charset);
                 conn.setRequestProperty("X-KNOWN-USERNAME", username);
@@ -102,6 +137,27 @@ public class JSONParser {
 
                 wr = new DataOutputStream(conn.getOutputStream());
                 wr.writeBytes(paramsString);
+                if (photo) {
+                    Log.i(TAG, "makeHttpRequest: getname  " + sourceFile.getName());
+                    wr.writeBytes(twoHyphens + boundary + lineEnd);
+                    wr.writeBytes("Content-Disposition: form-data; name=\"file\";filename=\"" + sourceFile.getName() + "\"" + lineEnd);
+                    wr.writeBytes(lineEnd);
+                    // create a buffer of  maximum size
+                    bytesAvailable = fileInputStream.available();
+                    bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                    buffer = new byte[bufferSize];
+                    // read file and write it into form...
+                    bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+                    while (bytesRead > 0) {
+                        wr.write(buffer, 0, bufferSize);
+                        bytesAvailable = fileInputStream.available();
+                        bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                        bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+                    }
+                    wr.writeBytes(lineEnd);
+                    wr.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+                }
+
                 wr.flush();
                 wr.close();
 
