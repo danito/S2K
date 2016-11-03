@@ -10,7 +10,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="be.nixekinder.preferencestest.be.nixekinder.ShareWithKnown.MainActivity">
+    tools:context="be.nixekinder.ShareWithKnown.MainActivity">
 
 
     <LinearLayout
@@ -78,13 +78,28 @@
             android:text="@string/edit_status_text"
             android:textSize="24sp" />
 
-        <ImageView
-            android:id="@+id/new_photo"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="3"
-            android:src="@drawable/ic_add_a_photo_black_24dp"
-            android:visibility="invisible" />
+            android:layout_height="match_parent"
+            android:layout_weight="3">
+
+            <ImageView
+                android:id="@+id/new_photo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:onClick="onClickImg"
+                android:src="@drawable/ic_add_a_photo_black_24dp"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:id="@+id/del_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|right"
+                android:src="@android:drawable/ic_menu_delete"
+                android:visibility="invisible" />
+        </FrameLayout>
 
 
         <LinearLayout

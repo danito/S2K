@@ -4,12 +4,15 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BlurMaskFilter;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.text.InputType;
@@ -35,11 +38,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -52,6 +58,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import be.nixekinder.preferencestest.R;
+import be.nixekinder.ShareWithKnown.Blur;
 
 import static android.R.attr.gravity;
 import static android.R.attr.key;
@@ -87,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
     private HashMap<String, String> postParameters;
     private ArrayList<HashMap<String, String>> servicelist;
     private ListView lv;
+    private Uri image;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
         String action = intent.getAction();
         String type = intent.getType();
 
-      
+
         showPrefs();
 
 
@@ -149,18 +157,99 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
         }
     }
 
+    private void removeImage(ImageView iv) {
+        iv.setImageResource(R.drawable.ic_add_a_photo_black_24dp);
+
+    }
+
+    private void setImage() {
+        Intent intent = new Intent();
+        // Show only images, no videos or anything else
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+// Always show the chooser (if there are multiple options available)
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), 0);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 0 && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            final Uri uri = data.getData();
+            try {
+                Transformation blurTransformation = new Transformation() {
+                    @Override
+                    public Bitmap transform(Bitmap source) {
+                        Bitmap blurred = Blur.fastblur(getBaseContext(), source, 10);
+                        source.recycle();
+                        return blurred;
+                    }
+
+                    @Override
+                    public String key() {
+                        return "blur()";
+                    }
+                };
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                // Log.d(TAG, String.valueOf(bitmap));
+
+
+                final ImageView ivShareImage = (ImageView) findViewById(R.id.new_photo);
+                ImageCompressionAsyncTask imageCompression = new ImageCompressionAsyncTask() {
+                    @Override
+                    protected void onPostExecute(byte[] imageBytes) {
+                        // image here is compressed & ready to be sent to the server
+                    }
+                };
+                String ib = uri.toString();
+                imageCompression.execute(ib);
+                //  imageView.setImageBitmap(bitmap);
+                //Picasso.with(getBaseContext()).load(uri).fit().into(ivShareImage);
+                Picasso.with(getBaseContext())
+                        .load(uri) // thumbnail url goes here
+                        .placeholder(R.drawable.ic_add_a_photo_black_24dp)
+                        .fit()
+                        .transform(blurTransformation)
+                        .into(ivShareImage, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                Picasso.with(getBaseContext())
+                                        .load(uri) // image url goes here
+                                        .fit()
+                                        .placeholder(ivShareImage.getDrawable())
+                                        .into(ivShareImage);
+                            }
+
+                            @Override
+                            public void onError() {
+                            }
+                        });
+                image = uri;
+                ImageView ivDelImage = (ImageView) findViewById(R.id.del_image);
+                ivDelImage.setVisibility(View.VISIBLE);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void onClickTb(View v) {
         ToggleButton t = (ToggleButton) v;
         myServices o = (myServices) t.getTag();
-        String service = o.service;
-        String username = o.username;
-        String name = o.name;
+        String syndication = o.service + "::" + o.username;
         if (t.isChecked()) {
-            Log.i(TAG, "onClickTb: " + service + " " + username);
-            setSyndicationList.put(username, service);
+            setSyndicationList.put(syndication, o.service);
         } else {
-            setSyndicationList.remove(username);
+            setSyndicationList.remove(syndication);
         }
+    }
+
+    public void onClickImg(View v) {
+        ImageView iv = (ImageView) v;
+        setImage();
+
     }
 
     public void onClick(View view) {
@@ -201,24 +290,22 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
         String mReply = reply.getText().toString().trim();
         EditText description = (EditText) findViewById(R.id.edit_status_description);
         String mDescription = description.getText().toString().trim();
-
-        ToggleButton btTwitter = (ToggleButton) findViewById(R.id.tw_toggle);
-        boolean tw = btTwitter.isChecked();
-        ToggleButton btFacebook = (ToggleButton) findViewById(R.id.fb_toggle);
-        boolean fb = btFacebook.isChecked();
-        String syn = "";
-        if (tw) {
-            syn = "twitter::nxD4n";
-        }
-
-        if (fb) {
-            syn = "facebook::1156781735;" + syn;
-        }
-
         String myAction = "/";
-
+        String syndication = "";
+        StringBuilder sbSyn = new StringBuilder();
+        int k = 0;
+        for (String key : setSyndicationList.keySet()) {
+            if (k != 0) {
+                sbSyn.append(";");
+            }
+            sbSyn.append(key);
+            k++;
+        }
+        if (sbSyn.length() > 0) {
+            syndication = sbSyn.toString();
+        }
         postParameters = new HashMap<>();
-        postParameters.put("syndication", syn);
+        postParameters.put("syndication", syndication);
         if (!status.equals("")) {
             switch (statusAction) {
                 case "status":
@@ -303,7 +390,6 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
                 return super.onOptionsItemSelected(item);
         }
     }
-
 
     private void showPrefs() {
 
@@ -517,9 +603,6 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
         Log.i(TAG, "onDialogDismiss: " + dismiss);
     }
 
-
-    // Handle incoming text or image
-
     /**
      * @param intent
      */
@@ -537,6 +620,9 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
             // tvIntent.setText(sharedText);
         }
     }
+
+
+    // Handle incoming text or image
 
     void handleSendImage(Intent intent) {
         Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
@@ -834,6 +920,29 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
     private void toast(String toast) {
         Toast.makeText(MainActivity.this, toast, Toast.LENGTH_SHORT).show();
     }
+
+    public abstract class ImageCompressionAsyncTask extends AsyncTask<String, Void, byte[]> {
+
+        @Override
+        protected byte[] doInBackground(String... strings) {
+            if (strings.length == 0 || strings[0] == null)
+                return null;
+            return ImageUtils.compressImage(strings[0]);
+        }
+
+        protected abstract void onPostExecute(byte[] imageBytes);
+    }
+    /*
+    ImageCompressionAsyncTask imageCompression = new ImageCompressionAsyncTask() {
+        @Override
+        protected void onPostExecute(byte[] imageBytes) {
+            // image here is compressed & ready to be sent to the server
+        }
+    };
+
+
+    imageCompression.execute(imagePath);// imagePath as a string
+     */
 
     class getJson extends AsyncTask<String, String, JSONObject> {
         JSONParser jsonParser = new JSONParser();
