@@ -62,7 +62,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import be.nixekinder.preferencestest.R;
-import be.nixekinder.ShareWithKnown.Blur;
+import be.nixekinder.ShareWithKnown.FilePath;
 
 import static android.R.attr.gravity;
 import static android.R.attr.key;
@@ -72,17 +72,16 @@ import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 public class MainActivity extends AppCompatActivity implements StatusUpdate.NoticeDialogListener {
     private static final String TAG = "IneedCoffee";
     private static final String PREFS_NAME = "sharedPref";
+    private static final int PICK_FILE_REQUEST = 1;
     SharedPreferences sharedPreferences;
     String prefUsername;
     String prefHostname;
     String prefApikey;
     String prefAction;
     int debug = 0;
-
     ImageView ivProfilePicture;
     SharedPreferences settings;
     SharedPreferences.Editor editor;
-
     String prefDisplayname;
     String prefPicture;
     ArrayList<HashMap<String, HashMap<String, String>>> serviceList;
@@ -100,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
     private ListView lv;
     private String image;
     private String decodedImage;
-
+    private String selectedFilePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,21 +182,9 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
 
         if (requestCode == 0 && resultCode == RESULT_OK && data != null && data.getData() != null) {
             final Uri uri = data.getData();
-            String filePath = null;
+            selectedFilePath = FilePath.getPath(this, uri);
+            Log.i(TAG, "Selected File Path:" + selectedFilePath);
 
-            Log.i(TAG, "onActivityResult: getscheme " + uri.getScheme());
-            if (uri != null && "content".equals(uri.getScheme())) {
-                Log.i(TAG, "onActivityResult: uri not null content");
-                Cursor cursor = this.getContentResolver().query(uri, new String[]{android.provider.MediaStore.Images.ImageColumns.DATA}, null, null, null);
-                cursor.moveToFirst();
-                filePath = cursor.getString(0);
-                Log.i(TAG, "onActivityResult: filepath " + filePath);
-                cursor.close();
-            } else {
-                filePath = uri.getPath();
-            }
-            image = filePath;
-            Log.i(TAG, "onActivityResult: filepath " + filePath);
 
             try {
                 Transformation blurTransformation = new Transformation() {
@@ -328,6 +315,7 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
         }
         postParameters = new HashMap<>();
         postParameters.put("syndication", syndication);
+        String method = "POST";
         if (!status.equals("")) {
             switch (statusAction) {
                 case "status":
@@ -359,12 +347,13 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
                     break;
                 case "image":
 
-                    if (!image.toString().equals("null")) {
+                    if (!selectedFilePath.equals("null")) {
                         postParameters.put("title", mStatus);
                         postParameters.put("body", mDescription);
 
-                        postParameters.put("photo", image.toString());
+                        postParameters.put("photo", selectedFilePath);
                         myAction = "/photo/edit";
+                        method = "PHOTO";
                     }
 
                     break;
@@ -372,7 +361,7 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
 
             if (!postParameters.isEmpty()) {
                 Log.i(TAG, "publishStatus: " + postParameters);
-                new getJson().execute(setHostname, "POST", setUsername, setApiKey, myAction);
+                new getJson().execute(setHostname, method, setUsername, setApiKey, myAction);
             }
 
         } else {
@@ -1003,10 +992,6 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
                 Log.i(TAG, "doInBackground: hostname " + hostname);
                 if (!args[4].equals(null)) {
                     signature = getSignature(args[3], args[4]);
-                    Log.i(TAG, "doInBackground: signature " + signature);
-                    Log.i(TAG, "doInBackground: arg4 " + args[4]);
-                    Log.i(TAG, "doInBackground: arg3 " + args[3]);
-                    Log.i(TAG, "doInBackground: arg2 " + args[2]);
                     url = url + args[4];
                 }
                 Log.i(TAG, "doInBackground: url = " + url);
