@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import static android.R.attr.apiKey;
 import static android.R.attr.name;
 import static android.content.ContentValues.TAG;
 
@@ -74,7 +75,6 @@ public class JSONParser {
                 try {
                     if (i != 0) {
                         sbParams.append("&");
-                        Log.i(TAG, "makeHttpRequest: i != 0 " + sbParams.toString());
                     }
                     if (key.equals("syndication")) {
                         Log.i(TAG, "makeHttpRequest: Syndication");
@@ -85,33 +85,39 @@ public class JSONParser {
                                 sbParams.append("&");
                             }
                             String service = services.nextToken();
-                            sbParams.append("syndication[]").append("=").append(URLEncoder.encode(service, charset));
-                            Log.i(TAG, "makeHttpRequest: services " + service);
+                            if (method.equals("PHOTO")) {
+                                sbParams.append("syndication[]").append("=").append(service);
+                            } else {
+                                sbParams.append("syndication[]").append("=").append(URLEncoder.encode(service, charset));
+                            }
                             t++;
 
                         }
-                        i--;
-                        Log.i(TAG, "makeHttpRequest: syndication done " + sbParams.toString());
-                        Log.i(TAG, "makeHttpRequest: syndication I " + i);
+                        if (t == 0) {
+                            i--;
+                        }
 
                     } else if (key.equals("photo")) {
-                        Log.i(TAG, "makeHttpRequest: Photo");
                         photo = true;
                         selectedFilePath = params.get(key);
                         i--;
-                        Log.i(TAG, "makeHttpRequest: photo I " + i);
 
                     } else {
-                        sbParams.append(key).append("=")
-                                .append(URLEncoder.encode(params.get(key), charset));
-                        Log.i(TAG, "makeHttpRequest: get params " + sbParams.toString());
+                        if (!method.equals("PHOTO")) {
+                            sbParams.append(key).append("=")
+                                    .append(URLEncoder.encode(params.get(key), charset));
+                        } else {
+                            sbParams.append(key).append("=")
+                                    .append(params.get(key));
+                        }
+                        Log.i(TAG, "makeHttpRequest: not a photo " + sbParams.toString());
+
                     }
 
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
                 i++;
-                Log.i(TAG, "makeHttpRequest: I++ " + i);
             }
         }
 
@@ -218,13 +224,9 @@ public class JSONParser {
 
             try {
                 fileInputStream = new FileInputStream(selectedFile);
-                urlObj = new URL(url);
 
-                /**
-                 *
-                 */
                 try {
-                    MultipartUtility multipart = new MultipartUtility(url, charset);
+                    MultipartUtility multipart = new MultipartUtility(url, charset, signature, username);
 
                     multipart.addHeaderField("Accept-Charset", charset);
                     multipart.addHeaderField("X-KNOWN-USERNAME", username);
@@ -235,102 +237,28 @@ public class JSONParser {
                         String v = p.nextToken();
                         Log.i(TAG, "makeHttpRequest:v " + v.toString());
                         String[] t = v.toString().split("=");
-                        multipart.addFormField(t[0], t[1]);
+                        if (t.length == 2) {
+                            multipart.addFormField(t[0], t[1]);
+                        } else {
+                            multipart.addFormField(t[0], "");
+                        }
+
                     }
 
                     multipart.addFilePart("photo", selectedFile);
                     List<String> response = multipart.finish();
+                    code = multipart.getResponseStatus();
 
                     for (String line : response) {
                         Log.i(TAG, "makeHttpRequest: line  " + line);
                         result.append(line);
-                        code = 200;
 
                     }
                 } catch (IOException ex) {
                     System.err.println(ex);
                 }
 
-            /*    conn = (HttpURLConnection) urlObj.openConnection();
-                conn.setDoInput(true);//Allow Inputs
-                conn.setDoOutput(true);//Allow Outputs
-                conn.setUseCaches(false);//Don't use a cached Copy
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Connection", "Keep-Alive");
-               // conn.setRequestProperty("ENCTYPE", "multipart/form-data");
-                conn.setRequestProperty("Accept-Charset", charset);
-                conn.setRequestProperty("X-KNOWN-USERNAME", username);
-                conn.setRequestProperty("X-KNOWN-SIGNATURE", signature);
-                conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-                conn.setRequestProperty("photo", selectedFilePath);
-
-
-                //creating new dataoutputstream
-                dataOutputStream = new DataOutputStream(conn.getOutputStream());
-                paramsString = sbParams.toString();
-                Log.i(TAG, "makeHttpRequest: paramstring PHOTO  " + paramsString);
-
-                dataOutputStream.writeBytes(lineEnd);
-                //writing bytes to data outputstream
-                dataOutputStream.writeBytes(twoHyphens + boundary + lineEnd);
-                dataOutputStream.writeBytes("Content-Disposition: form-data;name=\"photo\";filename=\""
-                        + selectedFilePath + "\"" + lineEnd);
-
-
-
-                //returns no. of bytes present in fileInputStream
-                bytesAvailable = fileInputStream.available();
-                //selecting the buffer size as minimum of available bytes or 1 MB
-                bufferSize = Math.min(bytesAvailable, maxBufferSize);
-                //setting the buffer as byte array of size of bufferSize
-                buffer = new byte[bufferSize];
-
-                //reads bytes from FileInputStream(from 0th index of buffer to buffersize)
-                bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-                //loop repeats till bytesRead = -1, i.e., no bytes are left to read
-                while (bytesRead > 0) {
-                    //write the bytes read from inputstream
-                    dataOutputStream.write(buffer, 0, bufferSize);
-                    bytesAvailable = fileInputStream.available();
-                    bufferSize = Math.min(bytesAvailable, maxBufferSize);
-                    bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-                }
-
-                dataOutputStream.writeBytes(lineEnd);
-                dataOutputStream.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
-
-                dataOutputStream.writeBytes(lineEnd);
-                dataOutputStream.writeBytes(twoHyphens + boundary + lineEnd);
-                dataOutputStream.writeBytes("Content-Disposition: form-data; name=\"" + "title" + "\"" + lineEnd);
-                dataOutputStream.writeBytes("Content-Type: text/plain; charset=" + charset +lineEnd);
-                dataOutputStream.writeBytes(lineEnd);
-                dataOutputStream.writeBytes("A test Title");
-                dataOutputStream.writeBytes(lineEnd);
-                //dataOutputStream.writeBytes(paramsString);
-
-
-                InputStream in = new BufferedInputStream(conn.getInputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                /*
-                result = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    Log.i(TAG, "makeHttpRequest: line " + line);
-                    result.append(line);
-                }
-
-                */
-                //closing the input and output streams
-              /*
-                fileInputStream.close();
-                dataOutputStream.flush();
-                dataOutputStream.close();
-
-*/
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
-
-            } catch (MalformedURLException e) {
                 e.printStackTrace();
 
             } catch (IOException e) {
@@ -344,19 +272,16 @@ public class JSONParser {
             //Receive the response from the server
             if (!photo) {
                 code = conn.getResponseCode();
-                Log.i(TAG, "makeHttpRequest: Response code from server " + code);
-            }
-            if (code == 200) {
-                result = new StringBuilder();
-                InputStream in = new BufferedInputStream(conn.getInputStream());
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    result.append(line);
+                if (code == 200) {
+                    InputStream in = new BufferedInputStream(conn.getInputStream());
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        result.append(line);
+                    }
                 }
             }
+
 
             Log.d("JSON Parser", "result: " + result.toString());
 
@@ -365,8 +290,9 @@ public class JSONParser {
         }
 
         result.append("{\"code\": " + code + "}");
-        conn.disconnect();
-
+        if (!photo) {
+            conn.disconnect();
+        }
 
         // try parse the string to a JSON object
         try {

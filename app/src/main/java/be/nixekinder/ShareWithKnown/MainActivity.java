@@ -701,11 +701,11 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
 
         //hide image placeholder
         ImageView new_photo = (ImageView) findViewById(R.id.new_photo);
-        new_photo.setVisibility(View.INVISIBLE);
+        new_photo.setVisibility(View.GONE);
 
         // Hide reactions
         LinearLayout ll_title = (LinearLayout) findViewById(R.id.ll_title);
-        ll_title.setVisibility(View.INVISIBLE);
+        ll_title.setVisibility(View.GONE);
         LinearLayout ll_url_reactions = (LinearLayout) findViewById(R.id.ll_url_reactions);
         ll_url_reactions.setVisibility(View.GONE);
     }

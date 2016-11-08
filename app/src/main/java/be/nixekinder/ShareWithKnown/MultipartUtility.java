@@ -23,6 +23,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import static android.content.ContentValues.TAG;
 
@@ -37,8 +38,11 @@ public class MultipartUtility {
     private final String boundary;
     private HttpURLConnection httpConn;
     private String charset;
+    private String signature;
+    private String username;
     private OutputStream outputStream;
     private PrintWriter writer;
+    private int responseStatus;
 
     /**
      * This constructor initializes a new HTTP POST request with content type
@@ -48,9 +52,11 @@ public class MultipartUtility {
      * @param charset
      * @throws IOException
      */
-    public MultipartUtility(String requestURL, String charset)
+    public MultipartUtility(String requestURL, String charset, String signature, String username)
             throws IOException {
         this.charset = charset;
+        this.username = username;
+        this.signature = signature;
 
         // creates a unique boundary based on time stamp
         boundary = "===" + System.currentTimeMillis() + "===";
@@ -61,6 +67,8 @@ public class MultipartUtility {
         httpConn.setDoOutput(true); // indicates POST method
         httpConn.setDoInput(true);
         httpConn.setRequestMethod("POST");
+        httpConn.setRequestProperty("X-KNOWN-USERNAME", username);
+        httpConn.setRequestProperty("X-KNOWN-SIGNATURE", signature);
         httpConn.setRequestProperty("Content-Type",
                 "multipart/form-data; boundary=" + boundary);
         outputStream = httpConn.getOutputStream();
@@ -141,7 +149,7 @@ public class MultipartUtility {
      * @throws IOException
      */
     public List<String> finish() throws IOException {
-        List<String> response = new ArrayList<String>();
+        List<String> response = new ArrayList<>();
 
         writer.append(LINE_FEED).flush();
         writer.append("--" + boundary + "--").append(LINE_FEED);
@@ -149,6 +157,7 @@ public class MultipartUtility {
 
         // checks server's status code first
         int status = httpConn.getResponseCode();
+        setResponseStatus(status);
         if (status == HttpURLConnection.HTTP_OK) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(
                     httpConn.getInputStream()));
@@ -163,5 +172,13 @@ public class MultipartUtility {
         }
 
         return response;
+    }
+
+    public int getResponseStatus() {
+        return responseStatus;
+    }
+
+    public void setResponseStatus(int responseStatus) {
+        this.responseStatus = responseStatus;
     }
 }

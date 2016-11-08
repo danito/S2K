@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Share WithKnown</string>
+    <string name="app_name">ShareWithKnown</string>
     <string name="set_title">User profile</string>
     <string name="set_user_name_summary">Set your Known username</string>
     <string name="set_user_name">Username</string>
