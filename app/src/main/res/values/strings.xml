@@ -43,4 +43,5 @@
     <string name="reply_to_hint">Reply to a site</string>
     <string name="posting">Posting status...</string>
     <string name="post_published">Status published</string>
+    <string name="nothingtopublish">Nothing to publish</string>
 </resources>

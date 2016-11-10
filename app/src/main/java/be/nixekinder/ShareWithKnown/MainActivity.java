@@ -69,7 +69,7 @@ import static android.R.attr.key;
 import static android.content.ContentValues.TAG;
 import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 
-public class MainActivity extends AppCompatActivity implements StatusUpdate.NoticeDialogListener {
+public class MainActivity extends AppCompatActivity {
     private static final String TAG = "IneedCoffee";
     private static final String PREFS_NAME = "sharedPref";
     private static final int PICK_FILE_REQUEST = 1;
@@ -123,11 +123,6 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
             Log.d("map values", entry.getKey() + ": " + entry.getValue().toString());
         }
 
-        // FontAwesome
-        Typeface iconFont = FontManager.getTypeface(getApplicationContext(), FontManager.FONTAWESOME);
-
-        //  FontManager.markAsIconContainer(findViewById(R.id.circlecontainer), iconFont);
-
         // Get intent, action and MIME type
         Intent intent = getIntent();
         String action = intent.getAction();
@@ -151,22 +146,18 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
 
     }
 
-    private void setServicesViews() {
-        String services = getSharedPref("setServices", "");
-        StringTokenizer tServices = new StringTokenizer(services, ";");
-        int t = 0;
-        while (tServices.hasMoreTokens()) {
-            String service = tServices.nextToken();
-            // twitter::user
-            t++;
-        }
-    }
+
 
     private void removeImage(ImageView iv) {
+        // TODO: 10.11.16 if publish ok, reset all forms
         iv.setImageResource(R.drawable.ic_add_a_photo_black_24dp);
-
     }
 
+    private void removeImage() {
+        // TODO: 10.11.16 if publish ok, reset all forms
+        ImageView iv = (ImageView) findViewById(R.id.new_photo);
+        iv.setImageResource(R.drawable.ic_add_a_photo_black_24dp);
+    }
     private void setImage() {
         Intent intent = new Intent();
         // Show only images, no videos or anything else
@@ -264,9 +255,10 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
     public void onClick(View view) {
 
         switch (view.getId()) {
-            case R.id.profile_image:
+        /*    case R.id.profile_image:
                 showConnectionDialog();
                 break;
+                */
             case R.id.add_image:
                 break;
             case R.id.form_status:
@@ -284,11 +276,7 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
             case R.id.bt_publish:
                 publishStatus();
                 break;
-          /*  case R.id.showAlertDialogFragment:
-                MyAlertDialogFragment alertDialogFragment = new MyAlertDialogFragment();
-                alertDialogFragment.show(manager, "fragment_edit_name");
-                break;
-                */
+
         }
     }
 
@@ -350,7 +338,6 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
                     if (!selectedFilePath.equals("null")) {
                         postParameters.put("title", mStatus);
                         postParameters.put("body", mDescription);
-
                         postParameters.put("photo", selectedFilePath);
                         myAction = "/photo/edit";
                         method = "PHOTO";
@@ -366,6 +353,7 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
 
         } else {
             // TODO: 26/10/2016 make toast nothing to publish
+            toast(getString(R.string.nothingtopublish));
         }
     }
 
@@ -378,17 +366,13 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
         EditText status = (EditText) findViewById(R.id.edit_status_form);
         EditText reply = (EditText) findViewById(R.id.in_reply_to);
         EditText description = (EditText) findViewById(R.id.edit_status_description);
-
+        removeImage();
         status.setText("");
         reply.setText("");
         description.setText("");
     }
 
-    private void showConnectionDialog() {
 
-        StatusUpdate dialog = new StatusUpdate();
-        dialog.show(getFragmentManager(), "Connection Dialog");
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -605,21 +589,6 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
         }
     }
 
-    @Override
-    public void onDialogPositiveClick(String username) {
-
-
-    }
-
-    @Override
-    public void onDialogNegativeClick() {
-
-    }
-
-    @Override
-    public void onDialogDismiss(String dismiss) {
-        Log.i(TAG, "onDialogDismiss: " + dismiss);
-    }
 
     /**
      * @param intent
@@ -1064,7 +1033,7 @@ public class MainActivity extends AppCompatActivity implements StatusUpdate.Noti
             username = null;
         }
 
-        public myServices(String s, String n, String u) {
+        public myServices(String s, String u, String n) {
             service = s;
             name = n;
             username = u;
