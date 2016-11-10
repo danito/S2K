@@ -19,9 +19,7 @@ import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.util.Log;
-import android.util.StringBuilderPrinter;
-import android.widget.ListAdapter;
-import android.widget.SimpleAdapter;
+import android.webkit.URLUtil;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -30,12 +28,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
 
-import be.nixekinder.preferencestest.R;
-
-import static android.R.attr.key;
 import static android.content.ContentValues.TAG;
 
 @SuppressLint("NewApi")
@@ -108,8 +102,10 @@ public class PrefFragment extends PreferenceFragment implements
             userIsOk = false;
         }
         String url = etpUrl.getText();
+
         Log.i(TAG, "onSharedPreferenceChanged: urlgettext " + url);
-        if (url == null) {
+        if (url == null || !URLUtil.isValidUrl(url)) {
+            //etpUrl.setText(getText(R.string.wrong_url) + " " + url);
             url = "";
             urlIsOK = false;
         }

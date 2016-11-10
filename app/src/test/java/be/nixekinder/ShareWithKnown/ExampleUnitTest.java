@@ -1,4 +1,4 @@
-package be.nixekinder.preferencestest;
+package be.nixekinder.ShareWithKnown;
 
 import org.junit.Test;
 

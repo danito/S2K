@@ -4,10 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BlurMaskFilter;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -17,7 +14,6 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.text.InputType;
-import android.util.Base64;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.Gravity;
@@ -27,15 +23,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RadioGroup;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -47,44 +40,25 @@ import com.squareup.picasso.Transformation;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
-
-import be.nixekinder.preferencestest.R;
-import be.nixekinder.ShareWithKnown.FilePath;
-
-import static android.R.attr.gravity;
-import static android.R.attr.key;
-import static android.content.ContentValues.TAG;
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "IneedCoffee";
     private static final String PREFS_NAME = "sharedPref";
-    private static final int PICK_FILE_REQUEST = 1;
     SharedPreferences sharedPreferences;
-    String prefUsername;
-    String prefHostname;
-    String prefApikey;
-    String prefAction;
+
     int debug = 0;
     ImageView ivProfilePicture;
     SharedPreferences settings;
     SharedPreferences.Editor editor;
-    String prefDisplayname;
-    String prefPicture;
+
     ArrayList<HashMap<String, HashMap<String, String>>> serviceList;
+    String prefPicture;
     private String setUsername;
     private String setHostname;
     private String setApiKey;
@@ -92,30 +66,21 @@ public class MainActivity extends AppCompatActivity {
     private HashMap<String, String> setSyndicationList = new HashMap<>();
     private boolean setReactions;
     private RadioGroup radioGroup;
-    private Button btnDisplay;
     private String statusAction;
     private HashMap<String, String> postParameters;
-    private ArrayList<HashMap<String, String>> servicelist;
-    private ListView lv;
-    private String image;
-    private String decodedImage;
     private String selectedFilePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.i(TAG, "onCreate: oncreate");
-
-
 
         settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE); //1
         editor = settings.edit();
 
-
-        //
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         ivProfilePicture = (ImageView) findViewById(R.id.profile_image);
+
         showPrefs();
 
         Map<String, ?> allEntries = sharedPreferences.getAll();
@@ -170,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.i(TAG, "onActivityResult: some intent intents " + requestCode + " " + resultCode);
 
         if (requestCode == 0 && resultCode == RESULT_OK && data != null && data.getData() != null) {
             final Uri uri = data.getData();
@@ -232,6 +198,9 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else {
+            Log.i(TAG, "onActivityResult: all is zero");
+            showPrefs();
         }
     }
 
@@ -275,6 +244,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.bt_publish:
                 publishStatus();
+                break;
+            case R.id.del_image:
+                removeImage();
                 break;
 
         }

@@ -3,8 +3,6 @@ package be.nixekinder.ShareWithKnown;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import be.nixekinder.preferencestest.R;
-
 public class shareImageActivity extends AppCompatActivity {
 
     @Override
